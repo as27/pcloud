@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -23,29 +22,16 @@ func LogIn(user, pass string) error {
 // LogOut logs the user out of the pCloud API. When the
 // logout request is successful the authToken is set to "".
 func LogOut() error {
-	u, err := url.Parse(HostURL + "/logout")
-	if err != nil {
-		return fmt.Errorf("LogOut url.Parse: %w", err)
-	}
-	q := u.Query()
-	q.Add("auth", authToken)
-	u.RawQuery = q.Encode()
-	resp, err := HTTPClient.Get(u.String())
-	if err != nil {
-		return fmt.Errorf("LogOut http.Get: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("LogOut status code: %d\n%s", resp.StatusCode, u.String())
-	}
 	type logoutResponse struct {
 		Result      int  `json:"result"`
 		AuthDeleted bool `json:"auth_deleted"`
 	}
 	lr := &logoutResponse{}
-	if err := json.NewDecoder(resp.Body).Decode(lr); err != nil {
-		return fmt.Errorf("LogOut json.Decode: %w", err)
+	err := apiRequest(lr, "logout")
+	if err != nil {
+		return fmt.Errorf("LogOut apiRequest: %w", err)
 	}
+
 	if !lr.AuthDeleted {
 		return fmt.Errorf("LogOut at server not succsessfull")
 	}
@@ -58,42 +44,30 @@ func getAuthToken(user, pass string) (string, error) {
 		Result int    `json:"result"`
 		Token  string `json:"auth"`
 	}
-
-	u, err := url.Parse(HostURL + "/userinfo")
-	if err != nil {
-		return "", fmt.Errorf("getAuthToken url.Parse: %w", err)
+	params := []param{
+		{name: "getauth", val: "1"},
+		{name: "logout", val: "1"},
+		{name: "username", val: user},
 	}
-	q := u.Query()
-	q.Add("getauth", "1")
-	q.Add("username", user)
-	q.Add("logout", "1")
 
 	// just the url changes, when AuthMethod changes
 	switch AuthMethod {
 	case AuthMethodPassword:
-		q.Add("password", pass)
+		params = append(params, param{"password", pass})
 	case AuthMethodDigest:
 		digest, err := getDigest()
 		if err != nil {
 			return "", fmt.Errorf("getAuthToken getDigest: %w", err)
 		}
 		passwordDigest := makePasswordDigest(user, pass, digest)
-		q.Add("passworddigest", passwordDigest)
-		q.Add("digest", digest)
-	}
-
-	u.RawQuery = q.Encode()
-	resp, err := HTTPClient.Get(u.String())
-	if err != nil {
-		return "", fmt.Errorf("getAuthToken http.Get: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("getAuthToken status code: %d\n%s", resp.StatusCode, u.String())
+		params = append(params, param{"passworddigest", passwordDigest})
+		params = append(params, param{"digest", digest})
 	}
 	ar := &authResponse{}
-	if err := json.NewDecoder(resp.Body).Decode(ar); err != nil {
-		return "", fmt.Errorf("getAuthToken json.Decode: %w", err)
+	err := apiRequest(ar, "userinfo", params...)
+
+	if err != nil {
+		return "", fmt.Errorf("getAuthToken apiRequest: %w", err)
 	}
 	return ar.Token, nil
 }

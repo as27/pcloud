@@ -1,6 +1,9 @@
 package pcloud
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 const (
 	HostURLEU    = "https://eapi.pcloud.com"
@@ -16,6 +19,7 @@ const (
 var (
 	HostURL    = HostURLEU        // HostURL is the base URL for the pCloud API.
 	AuthMethod = AuthMethodDigest // AuthMethod is the method used to authenticate with the pCloud API.
+	Timeout    = 5 * time.Second  // Timeout for the API requests
 )
 
 // HTTPClient is the HTTP client used to make requests to the pCloud API.
