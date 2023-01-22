@@ -34,7 +34,10 @@ func makeURL(method string, params ...Param) string {
 
 // ApiRequest is a generic function to request data from the pCloud API
 // It takes a pointer to a struct as response and a method name and
-// a list of parameters. The parameters are added to the url as query
+// a list of parameters. Into the respStuct the JSON response is decoded.
+//
+// This function uses the authToken variable to authenticate the request.
+// If the authToken is not set, the user needs to be logged in.
 func ApiRequest(respStruct any, method string, params ...Param) error {
 	u := makeURL(method, params...)
 	resp, err := HTTPClient.Get(u)

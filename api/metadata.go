@@ -1,7 +1,8 @@
-// Package api is the structure of the JSON returned by the pCloud API.
 package api
 
-// Metadata is returned when listing a folder
+// Metadata is returned when listfolder method is used.
+// Documentation of the API:
+// https://docs.pcloud.com/methods/folder/listfolder.html
 type Metadata struct {
 	Path           string     `json:"path"`
 	Name           string     `json:"name"`

@@ -1,4 +1,8 @@
-package pcloud
+// Package pfs implements the pCloud API as a fs.FS interface
+// At the moment this is a prototype and should not be used by
+// other packages! Because the API is not stable yet and the
+// implementation is not complete.
+package pfs
 
 import (
 	"io/fs"

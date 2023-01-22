@@ -73,7 +73,7 @@ func getAuthToken(user, pass string) (string, error) {
 }
 
 func getDigest() (string, error) {
-	digestURL := HostURL + DigestMethod
+	digestURL := HostURL + digestMethod
 	type digestResponse struct {
 		Result int    `json:"result"`
 		Digest string `json:"digest"`

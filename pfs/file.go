@@ -1,4 +1,4 @@
-package pcloud
+package pfs
 
 import (
 	"fmt"
