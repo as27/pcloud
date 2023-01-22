@@ -27,7 +27,7 @@ func LogOut() error {
 		AuthDeleted bool `json:"auth_deleted"`
 	}
 	lr := &logoutResponse{}
-	err := apiRequest(lr, "logout")
+	err := ApiRequest(lr, "logout")
 	if err != nil {
 		return fmt.Errorf("LogOut apiRequest: %w", err)
 	}
@@ -44,27 +44,27 @@ func getAuthToken(user, pass string) (string, error) {
 		Result int    `json:"result"`
 		Token  string `json:"auth"`
 	}
-	params := []param{
-		{name: "getauth", val: "1"},
-		{name: "logout", val: "1"},
-		{name: "username", val: user},
+	params := []Param{
+		{Name: "getauth", Val: "1"},
+		{Name: "logout", Val: "1"},
+		{Name: "username", Val: user},
 	}
 
 	// just the url changes, when AuthMethod changes
 	switch AuthMethod {
 	case AuthMethodPassword:
-		params = append(params, param{"password", pass})
+		params = append(params, Param{"password", pass})
 	case AuthMethodDigest:
 		digest, err := getDigest()
 		if err != nil {
 			return "", fmt.Errorf("getAuthToken getDigest: %w", err)
 		}
 		passwordDigest := makePasswordDigest(user, pass, digest)
-		params = append(params, param{"passworddigest", passwordDigest})
-		params = append(params, param{"digest", digest})
+		params = append(params, Param{"passworddigest", passwordDigest})
+		params = append(params, Param{"digest", digest})
 	}
 	ar := &authResponse{}
-	err := apiRequest(ar, "userinfo", params...)
+	err := ApiRequest(ar, "userinfo", params...)
 
 	if err != nil {
 		return "", fmt.Errorf("getAuthToken apiRequest: %w", err)

@@ -1,6 +1,9 @@
 package pcloud
 
 import (
+	"fmt"
+	"io"
+	"io/fs"
 	"os"
 	"time"
 )
@@ -8,6 +11,9 @@ import (
 // File implements the fs.File interface for pCloud-files
 type File struct {
 	FileStat
+	body  io.ReadCloser
+	isDir bool
+	files []File
 }
 
 type FileStat struct {
@@ -22,17 +28,29 @@ type FileStat struct {
 
 // Stat implements os.File
 func (f File) Stat() (os.FileInfo, error) {
-	return nil, nil
+	return f, nil
 }
 
 // Read implements os.File
-func (f File) Read([]byte) (int, error) {
-	return 0, nil
+func (f File) Read(b []byte) (int, error) {
+	fmt.Println("Read", f.FileStat.Path)
+	//return f.body.Read(b)
+	return 0, io.EOF
 }
 
 // Close implements os.File
 func (f File) Close() error {
+	//return f.body.Close()
 	return nil
+}
+
+// ReadDir implementation for fs.FS
+func (f File) ReadDir(n int) ([]fs.DirEntry, error) {
+	de := make([]fs.DirEntry, len(f.files))
+	for i, f := range f.files {
+		de[i] = f
+	}
+	return de, nil
 }
 
 // Name implements os.FileInfo
@@ -46,21 +64,32 @@ func (f File) Size() int64 {
 }
 
 // Mode implements os.FileInfo
-func (f File) Mode() os.FileMode {
+func (f File) Mode() fs.FileMode {
 	return 0
+}
+
+func (f File) Type() fs.FileMode {
+	if f.isDir {
+		return fs.ModeDir
+	}
+	return fs.ModeType
 }
 
 // ModTime implements os.FileInfo
 func (f File) ModTime() time.Time {
-	return time.Now()
+	return f.Modified
 }
 
 // IsDir implements os.FileInfo
 func (f File) IsDir() bool {
-	return false
+	return f.isDir
+}
+
+func (f File) Info() (fs.FileInfo, error) {
+	return f, nil
 }
 
 // Sys implements os.FileInfo
 func (f File) Sys() any {
-	return nil
+	return 0
 }

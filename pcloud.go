@@ -25,7 +25,10 @@ var (
 // HTTPClient is the HTTP client used to make requests to the pCloud API.
 // If you want to define your own HTTP client, you can do so by setting
 // this variable to your client.
-var HTTPClient = &http.Client{}
+// The default client uses the Timout variable of this package.
+var HTTPClient = &http.Client{
+	Timeout: Timeout,
+}
 
 // authToken is the authentication token used to authenticate with the pCloud API.
 // This token is set, when the user is authenticated.

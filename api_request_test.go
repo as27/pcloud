@@ -9,7 +9,7 @@ func Test_makeURL(t *testing.T) {
 	})
 	type args struct {
 		method string
-		params []param
+		params []Param
 	}
 	tests := []struct {
 		name string
@@ -20,10 +20,10 @@ func Test_makeURL(t *testing.T) {
 			name: "Test 1",
 			args: args{
 				method: "test",
-				params: []param{
+				params: []Param{
 					{
-						name: "test",
-						val:  "test",
+						Name: "test",
+						Val:  "test",
 					},
 				},
 			},
@@ -33,14 +33,14 @@ func Test_makeURL(t *testing.T) {
 			name: "Test 2",
 			args: args{
 				method: "test",
-				params: []param{
+				params: []Param{
 					{
-						name: "test",
-						val:  "test",
+						Name: "test",
+						Val:  "test",
 					},
 					{
-						name: "test2",
-						val:  "test2",
+						Name: "test2",
+						Val:  "test2",
 					},
 				},
 			},
@@ -50,7 +50,7 @@ func Test_makeURL(t *testing.T) {
 			name: "Test no params",
 			args: args{
 				method: "test",
-				params: []param{},
+				params: []Param{},
 			},
 			want: "https://eapi.pcloud.com/test?auth=test",
 		},

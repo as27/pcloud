@@ -7,12 +7,13 @@ import (
 	"net/url"
 )
 
-type param struct {
-	name string
-	val  string
+// Param is a struct to hold a parameter for an API request
+type Param struct {
+	Name string
+	Val  string
 }
 
-func makeURL(method string, params ...param) string {
+func makeURL(method string, params ...Param) string {
 	u, err := url.Parse(fmt.Sprintf("%s/%s", HostURL, method))
 	if err != nil {
 		// if the url is not valid the program should exit
@@ -25,15 +26,17 @@ func makeURL(method string, params ...param) string {
 		q.Add("auth", authToken)
 	}
 	for _, p := range params {
-		q.Add(p.name, p.val)
+		q.Add(p.Name, p.Val)
 	}
 	u.RawQuery = q.Encode()
 	return u.String()
 }
 
-func apiRequest(response any, method string, params ...param) error {
+// ApiRequest is a generic function to request data from the pCloud API
+// It takes a pointer to a struct as response and a method name and
+// a list of parameters. The parameters are added to the url as query
+func ApiRequest(respStruct any, method string, params ...Param) error {
 	u := makeURL(method, params...)
-	fmt.Println(u)
 	resp, err := HTTPClient.Get(u)
 	if err != nil {
 		return fmt.Errorf("apiRequest http.Get: %w", err)
@@ -42,7 +45,7 @@ func apiRequest(response any, method string, params ...param) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("apiRequest status code: %d", resp.StatusCode)
 	}
-	if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(respStruct); err != nil {
 		return fmt.Errorf("apiRequest json.Decode: %w", err)
 	}
 	return nil
